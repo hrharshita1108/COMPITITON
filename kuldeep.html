@@ -1,0 +1,82 @@
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<title>Quiz Game</title>
+<style>
+body{font-family:Arial;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;justify-content:center;align-items:center;height:100vh}
+.box{background:white;padding:25px;border-radius:20px;width:400px;text-align:center;box-shadow:0 10px 30px #333}
+button{width:100%;padding:12px;margin:7px 0;border:0;border-radius:10px;cursor:pointer;font-size:16px}
+.opt{background:#eee}.opt:hover{background:#ddd}
+#next{background:#5b4ce2;color:white;display:none}
+#msg{font-weight:bold}
+</style>
+</head>
+
+<body>
+<div class="box">
+<h1>🧠 Quiz Game</h1>
+<p id="num"></p>
+<h2 id="q"></h2>
+<div id="options"></div>
+<p id="msg"></p>
+<button id="next" onclick="next()">Next ➡️</button>
+</div>
+
+<script>
+let qs=[
+["HTML ka full form?","Hyper Text Markup Language","High Text Machine Language","Hyper Tool Language",0],
+["CSS ka use?","Database","Website Style","Server",1],
+["JavaScript kya hai?","Programming Language","Browser","OS",0],
+["Heading ka tag?","<p>","<h1>","<img>",1],
+["Text color ke liye?","font-size","background","color",2]
+];
+
+let i=0,score=0;
+show();
+
+function show(){
+document.getElementById("num").innerText=`Question ${i+1} of 5`;
+document.getElementById("q").innerText=qs[i][0];
+document.getElementById("msg").innerText="";
+document.getElementById("next").style.display="none";
+let o=document.getElementById("options");o.innerHTML="";
+
+for(let x=1;x<=3;x++){
+let b=document.createElement("button");
+b.className="opt";b.innerText=qs[i][x];
+b.onclick=()=>check(x-1,b);
+o.appendChild(b);
+}
+}
+
+function check(x,b){
+let a=document.querySelectorAll(".opt");
+a.forEach(e=>e.disabled=true);
+
+if(x==qs[i][4]){
+b.style.background="#86efac";
+document.getElementById("msg").innerText="✅ Correct Answer!";
+score++;
+}else{
+b.style.background="#fca5a5";
+a[qs[i][4]].style.background="#86efac";
+document.getElementById("msg").innerText="❌ Incorrect Answer!";
+}
+document.getElementById("next").style.display="block";
+}
+
+function next(){
+i++;
+if(i<5) show();
+else{
+let r=score==5?"🌟 Excellent":score>=4?"👍 Good":score>=3?"😊 Better":"💪 Next Time Better";
+document.querySelector(".box").innerHTML=
+`<h1>🏆 Quiz Complete</h1><h2>Score: ${score}/5</h2><h2>${r}</h2>
+<button onclick="location.reload()">🔄 Play Again</button>`;
+}
+}
+</script>
+</body>
+</html>
+```
