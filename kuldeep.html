@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Game</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      padding: 20px;
+    }
+
+    .quiz-container {
+      width: 100%;
+      max-width: 650px;
+      background: white;
+      border-radius: 25px;
+      padding: 30px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    }
+
+    .title {
+      text-align: center;
+      color: #4f46e5;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #777;
+      margin-bottom: 25px;
+    }
+
+    .progress-box {
+      background: #eee;
+      height: 10px;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 25px;
+    }
+
+    .progress {
+      height: 100%;
+      width: 20%;
+      background: linear-gradient(90deg, #4f46e5, #9333ea);
+      transition: 0.4s;
+    }
+
+    .question-number {
+      color: #777;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .question {
+      font-size: 23px;
+      color: #222;
+      margin-bottom: 25px;
+      line-height: 1.4;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .option {
+      border: 2px solid #ddd;
+      padding: 16px;
+      border-radius: 14px;
+      background: #fafafa;
+      cursor: pointer;
+      font-size: 17px;
+      transition: 0.25s;
+    }
+
+    .option:hover {
+      border-color: #6366f1;
+      background: #eef2ff;
+      transform: translateX(5px);
+    }
+
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+      color: #166534;
+    }
+
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+      color: #991b1b;
+    }
+
+    .option.disabled {
+      pointer-events: none;
+    }
+
+    .result-message {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin: 20px 0;
+      min-height: 28px;
+    }
+
+    .next-btn,
+    .restart-btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 14px;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      background: linear-gradient(135deg, #4f46e5, #9333ea);
+      transition: 0.3s;
+    }
+
+    .next-btn:hover,
+    .restart-btn:hover {
+      transform: scale(1.02);
+    }
+
+    .next-btn {
+      display: none;
+      margin-top: 10px;
+    }
+
+    /* Result Screen */
+    .result-screen {
+      display: none;
+      text-align: center;
+    }
+
+    .trophy {
+      font-size: 75px;
+      margin-bottom: 10px;
+    }
+
+    .result-screen h2 {
+      color: #4f46e5;
+      font-size: 30px;
+      margin-bottom: 15px;
+    }
+
+    .score {
+      font-size: 25px;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    .ranking {
+      font-size: 24px;
+      padding: 15px;
+      border-radius: 15px;
+      background: #eef2ff;
+      margin-bottom: 25px;
+    }
+
+    .good {
+      color: #16a34a;
+    }
+
+    .better {
+      color: #2563eb;
+    }
+
+    .excellent {
+      color: #9333ea;
+    }
+
+    .next-time {
+      color: #ea580c;
+    }
+
+    @media (max-width: 500px) {
+      .quiz-container {
+        padding: 20px;
+      }
+
+      .title {
+        font-size: 27px;
+      }
+
+      .question {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="quiz-container">
+
+    <!-- QUIZ SCREEN -->
+    <div id="quizScreen">
+
+      <h1 class="title">🧠 Quiz Game</h1>
+      <p class="subtitle">Test Your Knowledge!</p>
+
+      <div class="progress-box">
+        <div class="progress" id="progress"></div>
+      </div>
+
+      <p class="question-number" id="questionNumber">
+        Question 1 of 5
+      </p>
+
+      <h2 class="question" id="question">
+        Question goes here
+      </h2>
+
+      <div class="options" id="options"></div>
+
+      <div class="result-message" id="resultMessage"></div>
+
+      <button class="next-btn" id="nextBtn">
+        Next Question ➡️
+      </button>
+
+    </div>
+
+
+    <!-- RESULT SCREEN -->
+    <div class="result-screen" id="resultScreen">
+
+      <div class="trophy">🏆</div>
+
+      <h2>Quiz Completed!</h2>
+
+      <div class="score" id="finalScore">
+        Score: 0 / 5
+      </div>
+
+      <div class="ranking" id="ranking">
+        Excellent 🌟
+      </div>
+
+      <button class="restart-btn" onclick="restartQuiz()">
+        🔄 Play Again
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    // ============================
+    // QUIZ QUESTIONS
+    // ============================
+
+    const questions = [
+      {
+        question: "HTML ka full form kya hai?",
+        options: [
+          "Hyper Text Markup Language",
+          "High Text Machine Language",
+          "Hyper Tool Multi Language"
+        ],
+        answer: 0
+      },
+
+      {
+        question: "CSS ka use kisliye hota hai?",
+        options: [
+          "Database banane ke liye",
+          "Website ko style karne ke liye",
+          "Server create karne ke liye"
+        ],
+        answer: 1
+      },
+
+      {
+        question: "JavaScript kya hai?",
+        options: [
+          "Programming Language",
+          "Operating System",
+          "Web Browser"
+        ],
+        answer: 0
+      },
+
+      {
+        question: "HTML me heading ke liye kaunsa tag use hota hai?",
+        options: [
+          "<p>",
+          "<h1>",
+          "<img>"
+        ],
+        answer: 1
+      },
+
+      {
+        question: "CSS me text ka color change karne ke liye kya use hota hai?",
+        options: [
+          "font-size",
+          "background",
+          "color"
+        ],
+        answer: 2
+      }
+    ];
+
+
+    // ============================
+    // VARIABLES
+    // ============================
+
+    let currentQuestion = 0;
+    let score = 0;
+    let answered = false;
+
+
+    // ============================
+    // GET HTML ELEMENTS
+    // ============================
+
+    const questionNumber =
+      document.getElementById("questionNumber");
+
+    const question =
+      document.getElementById("question");
+
+    const optionsContainer =
+      document.getElementById("options");
+
+    const resultMessage =
+      document.getElementById("resultMessage");
+
+    const nextBtn =
+      document.getElementById("nextBtn");
+
+    const progress =
+      document.getElementById("progress");
+
+    const quizScreen =
+      document.getElementById("quizScreen");
+
+    const resultScreen =
+      document.getElementById("resultScreen");
+
+    const finalScore =
+      document.getElementById("finalScore");
+
+    const ranking =
+      document.getElementById("ranking");
+
+
+    // ============================
+    // LOAD QUESTION
+    // ============================
+
+    function loadQuestion() {
+
+      answered = false;
+
+      resultMessage.innerHTML = "";
+
+      nextBtn.style.display = "none";
+
+      const current = questions[currentQuestion];
+
+      questionNumber.innerText =
+        `Question ${currentQuestion + 1} of ${questions.length}`;
+
+      question.innerText = current.question;
+
+      progress.style.width =
+        `${((currentQuestion + 1) / questions.length) * 100}%`;
+
+      optionsContainer.innerHTML = "";
+
+      current.options.forEach((option, index) => {
+
+        const button = document.createElement("div");
+
+        button.classList.add("option");
+
+        button.innerText = option;
+
+        button.onclick = () => checkAnswer(index, button);
+
+        optionsContainer.appendChild(button);
+
+      });
+    }
+
+
+    // ============================
+    // CHECK ANSWER
+    // ============================
+
+    function checkAnswer(selectedIndex, selectedButton) {
+
+      if (answered) return;
+
+      answered = true;
+
+      const correctIndex =
+        questions[currentQuestion].answer;
+
+      const allOptions =
+        document.querySelectorAll(".option");
+
+      // Disable all options
+      allOptions.forEach(option => {
+        option.classList.add("disabled");
+      });
+
+
+      if (selectedIndex === correctIndex) {
+
+        // Correct Answer
+        selectedButton.classList.add("correct");
+
+        resultMessage.innerHTML =
+          "✅ Correct Answer! 🎉";
+
+        resultMessage.style.color = "#16a34a";
+
+        score++;
+
+      } else {
+
+        // Incorrect Answer
+        selectedButton.classList.add("incorrect");
+
+        allOptions[correctIndex].classList.add("correct");
+
+        resultMessage.innerHTML =
+          "❌ Incorrect Answer!";
+
+        resultMessage.style.color = "#dc2626";
+      }
+
+      nextBtn.style.display = "block";
+
+    }
+
+
+    // ============================
+    // NEXT QUESTION
+    // ============================
+
+    nextBtn.addEventListener("click", () => {
+
+      currentQuestion++;
+
+      if (currentQuestion < questions.length) {
+
+        loadQuestion();
+
+      } else {
+
+        showResult();
+
+      }
+
+    });
+
+
+    // ============================
+    // SHOW FINAL RESULT
+    // ============================
+
+    function showResult() {
+
+      quizScreen.style.display = "none";
+
+      resultScreen.style.display = "block";
+
+      finalScore.innerText =
+        `Your Score: ${score} / ${questions.length}`;
+
+      let percentage =
+        (score / questions.length) * 100;
+
+
+      if (percentage === 100) {
+
+        ranking.innerHTML =
+          "🌟 EXCELLENT 🌟";
+
+        ranking.className =
+          "ranking excellent";
+
+      } else if (percentage >= 80) {
+
+        ranking.innerHTML =
+          "👍 GOOD 👍";
+
+        ranking.className =
+          "ranking good";
+
+      } else if (percentage >= 60) {
+
+        ranking.innerHTML =
+          "😊 BETTER 😊";
+
+        ranking.className =
+          "ranking better";
+
+      } else {
+
+        ranking.innerHTML =
+          "💪 NEXT TIME BETTER 💪";
+
+        ranking.className =
+          "ranking next-time";
+      }
+
+    }
+
+
+    // ============================
+    // RESTART QUIZ
+    // ============================
+
+    function restartQuiz() {
+
+      currentQuestion = 0;
+
+      score = 0;
+
+      resultScreen.style.display = "none";
+
+      quizScreen.style.display = "block";
+
+      loadQuestion();
+
+    }
+
+
+    // Start Quiz
+    loadQuestion();
+
+  </script>
+
+</body>
+</html>
